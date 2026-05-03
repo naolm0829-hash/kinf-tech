@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff') format('woff');
+  font-weight: 700;
+}
+
+@layer base {
+  :root {
+    --background: 40 33% 97%;
+    --foreground: 220 30% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 18%;
+
+    --primary: 213 45% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 100 22% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 40 20% 93%;
+    --muted-foreground: 220 15% 46%;
+
+    --accent: 30 80% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 213 45% 62%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 213 45% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 100 22% 90%;
+    --sidebar-accent-foreground: 220 30% 18%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 213 45% 62%;
+
+    /* Custom tokens */
+    --kinf-sage: 100 22% 53%;
+    --kinf-sage-light: 100 22% 92%;
+    --kinf-blue: 213 45% 62%;
+    --kinf-blue-light: 213 45% 92%;
+    --kinf-cream: 40 33% 97%;
+    --kinf-warm: 30 80% 65%;
+    --kinf-warm-light: 30 80% 92%;
+
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .dark {
+    --background: 220 20% 10%;
+    --foreground: 40 20% 92%;
+
+    --card: 220 18% 14%;
+    --card-foreground: 40 20% 92%;
+
+    --popover: 220 18% 14%;
+    --popover-foreground: 40 20% 92%;
+
+    --primary: 213 45% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 100 22% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 30 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 213 45% 62%;
+
+    --kinf-sage: 100 22% 40%;
+    --kinf-sage-light: 100 15% 20%;
+    --kinf-blue: 213 45% 55%;
+    --kinf-blue-light: 213 30% 20%;
+    --kinf-cream: 220 20% 10%;
+    --kinf-warm: 30 60% 50%;
+    --kinf-warm-light: 30 40% 18%;
+  }
+
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 213 90% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 100 50% 30%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 20%;
+
+    --accent: 30 100% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --ring: 213 90% 35%;
+
+    --kinf-sage: 100 50% 30%;
+    --kinf-sage-light: 100 30% 90%;
+    --kinf-blue: 213 90% 35%;
+    --kinf-blue-light: 213 50% 90%;
+    --kinf-cream: 0 0% 100%;
+    --kinf-warm: 30 100% 45%;
+    --kinf-warm-light: 30 60% 90%;
+
+    font-weight: 600;
+  }
+
+  .sensory-mode {
+    font-family: 'OpenDyslexic', sans-serif !important;
+    --background: 45 30% 96%;
+    --foreground: 220 20% 25%;
+    --primary: 213 35% 55%;
+    --secondary: 100 18% 50%;
+    --accent: 30 60% 60%;
+    --muted: 40 15% 90%;
+    --border: 220 10% 85%;
+  }
+
+  .sensory-mode * {
+    font-family: 'OpenDyslexic', sans-serif !important;
+    letter-spacing: 0.04em;
+  }
+
+  .sensory-mode body {
+    font-size: 1.15rem;
+    line-height: 1.8;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-gradient-kinf {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--kinf-blue)), hsl(var(--kinf-sage)));
+  }
+  .bg-gradient-kinf {
+    background-image: linear-gradient(135deg, hsl(var(--kinf-blue)), hsl(var(--kinf-sage)));
+  }
+  .bg-gradient-warm {
+    background-image: linear-gradient(135deg, hsl(var(--kinf-warm)), hsl(var(--kinf-sage)));
+  }
+  .shadow-kinf {
+    box-shadow: 0 4px 20px -4px hsl(var(--kinf-blue) / 0.2);
+  }
+  .shadow-kinf-lg {
+    box-shadow: 0 8px 32px -8px hsl(var(--kinf-blue) / 0.25);
+  }
+}
