@@ -11,7 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
-const TELEBIRR_NUMBER = "+251 911 00 00 00";
+const TELEBIRR_NUMBER = "0930164845";
+const TELEBIRR_NAME = "KinfTech (Naol Mesfin)";
 const PRICE_ETB = 140;
 
 interface Receipt {
@@ -121,10 +122,12 @@ const Premium = () => {
         <Card className="mb-4">
           <CardContent className="p-5">
             <h2 className="mb-2 font-bold">Step 1 — Send {PRICE_ETB} ETB via Telebirr</h2>
-            <div className="rounded-lg bg-muted p-3 text-sm">
-              <p>📱 Send to: <span className="font-mono font-bold">{TELEBIRR_NUMBER}</span></p>
-              <p>💵 Amount: <span className="font-bold">{PRICE_ETB} ETB</span></p>
-              <p>🏷 Reference: <span className="font-mono">KINF-{user.id.slice(0, 6)}</span></p>
+            <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
+              <p>📱 Telebirr number: <span className="font-mono font-bold text-base">{TELEBIRR_NUMBER}</span></p>
+              <p>👤 Account name: <span className="font-bold">{TELEBIRR_NAME}</span></p>
+              <p>💵 Amount: <span className="font-bold">{PRICE_ETB} ETB</span> (1 month)</p>
+              <p>🏷 Reference (paste in Telebirr remark): <span className="font-mono">KINF-{user.id.slice(0, 6)}</span></p>
+              <p className="mt-2 text-xs text-muted-foreground">After sending, copy your Telebirr transaction ID (you'll receive it by SMS) and submit it below. Admin verifies within 24h.</p>
             </div>
           </CardContent>
         </Card>

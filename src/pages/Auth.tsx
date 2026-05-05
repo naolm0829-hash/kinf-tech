@@ -50,7 +50,9 @@ const Auth = () => {
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else if (isSignUp) {
-      toast({ title: "Check your email", description: "We sent you a confirmation link." });
+      toast({ title: "Welcome!", description: "Account created. Signing you in…" });
+      // Auto-confirm is enabled — sign in immediately
+      await signIn(email, password);
     }
   };
 
