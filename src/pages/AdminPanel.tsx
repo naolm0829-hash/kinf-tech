@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, ShieldCheck, Users, BookOpen, MessagesSquare, CreditCard, Sparkles, Search, Crown, X, Check } from "lucide-react";
+import { Trash2, ShieldCheck, Users, BookOpen, MessagesSquare, CreditCard, Sparkles, Search, Crown, X, Check, Megaphone, Ticket, BarChart3, Plus, Stethoscope } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,6 +62,15 @@ const AdminPanel = () => {
   }, [subs]);
 
   const isUserAdmin = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
+  const isUserTherapist = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "therapist");
+  const promoteToTherapist = async (uid: string) => {
+    const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "therapist" });
+    if (error) toast.error(error.message); else { toast.success("Marked as therapist"); refresh(); }
+  };
+  const demoteFromTherapist = async (uid: string) => {
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "therapist");
+    if (error) toast.error(error.message); else { toast.success("Removed therapist"); refresh(); }
+  };
 
   const displayName = (uid: string) => {
     const p = profileByUser.get(uid);
@@ -82,6 +92,23 @@ const AdminPanel = () => {
     return (p.parent_name?.toLowerCase().includes(q) || p.child_name?.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q));
   });
 
+  const grantPremium = async (uid: string, months = 1) => {
+    const expires = new Date(); expires.setMonth(expires.getMonth() + months);
+    const { error } = await supabase.from("subscriptions").upsert({
+      user_id: uid,
+      plan: "premium",
+      status: "active",
+      activated_at: new Date().toISOString(),
+      expires_at: expires.toISOString(),
+    }, { onConflict: "user_id" });
+    if (error) toast.error(error.message); else { toast.success(`Premium granted (${months}mo)`); refresh(); }
+  };
+  const revokePremium = async (uid: string) => {
+    const { error } = await supabase.from("subscriptions").upsert({
+      user_id: uid, plan: "premium", status: "inactive", expires_at: null,
+    }, { onConflict: "user_id" });
+    if (error) toast.error(error.message); else { toast.success("Premium revoked"); refresh(); }
+  };
   const promoteToAdmin = async (uid: string) => {
     const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
     if (error) toast.error(error.message); else { toast.success("Promoted to admin"); refresh(); }
@@ -136,7 +163,25 @@ const AdminPanel = () => {
             <TabsTrigger value="progress"><BookOpen className="mr-1 h-4 w-4" /> Progress ({progress.length})</TabsTrigger>
             <TabsTrigger value="community"><MessagesSquare className="mr-1 h-4 w-4" /> Community ({community.length})</TabsTrigger>
             <TabsTrigger value="insights"><Sparkles className="mr-1 h-4 w-4" /> Insights ({insights.length})</TabsTrigger>
+            <TabsTrigger value="announcements"><Megaphone className="mr-1 h-4 w-4" /> Announce</TabsTrigger>
+            <TabsTrigger value="promo"><Ticket className="mr-1 h-4 w-4" /> Promo</TabsTrigger>
+            <TabsTrigger value="analytics"><BarChart3 className="mr-1 h-4 w-4" /> Analytics</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="announcements"><AnnouncementsAdmin userId={user.id} /></TabsContent>
+          <TabsContent value="promo"><PromoAdmin /></TabsContent>
+          <TabsContent value="analytics">
+            <Card><CardContent className="p-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat label="Users" value={profiles.length} />
+              <Stat label="Premium active" value={subs.filter(s => s.status === 'active').length} />
+              <Stat label="Pending payments" value={pendingReceipts.length} />
+              <Stat label="Total revenue (ETB)" value={receipts.filter(r => r.status === 'approved').reduce((a, r) => a + Number(r.amount || 0), 0)} />
+              <Stat label="Lessons completed" value={progress.reduce((a, p) => a + (p.lessons_completed || 0), 0)} />
+              <Stat label="Community posts" value={community.length} />
+              <Stat label="Insights generated" value={insights.length} />
+              <Stat label="Admins" value={roles.filter(r => r.role === 'admin').length} />
+            </CardContent></Card>
+          </TabsContent>
 
           <TabsContent value="payments">
             <Card><CardContent className="p-4 space-y-2">
@@ -188,9 +233,17 @@ const AdminPanel = () => {
                         </p>
                         <p className="text-xs text-muted-foreground">{p.email ?? "—"} · child: {p.child_name ?? "—"} ({p.child_age ?? "?"})</p>
                       </div>
-                      {admin
-                        ? <Button size="sm" variant="outline" onClick={() => demoteFromAdmin(p.user_id)} disabled={p.user_id === user.id}>Remove admin</Button>
-                        : <Button size="sm" variant="outline" onClick={() => promoteToAdmin(p.user_id)}>Make admin</Button>}
+                      <div className="flex flex-wrap gap-2">
+                        {sub?.status === "active"
+                          ? <Button size="sm" variant="outline" onClick={() => revokePremium(p.user_id)}>Revoke premium</Button>
+                          : <Button size="sm" className="gap-1 bg-secondary text-secondary-foreground" onClick={() => grantPremium(p.user_id, 1)}><Crown className="h-3 w-3" /> Grant premium</Button>}
+                        {admin
+                          ? <Button size="sm" variant="outline" onClick={() => demoteFromAdmin(p.user_id)} disabled={p.user_id === user.id}>Remove admin</Button>
+                          : <Button size="sm" variant="outline" onClick={() => promoteToAdmin(p.user_id)}>Make admin</Button>}
+                        {isUserTherapist(p.user_id)
+                          ? <Button size="sm" variant="outline" onClick={() => demoteFromTherapist(p.user_id)}>Remove therapist</Button>
+                          : <Button size="sm" variant="outline" onClick={() => promoteToTherapist(p.user_id)}><Stethoscope className="h-3 w-3" /> Make therapist</Button>}
+                      </div>
                     </div>
                   );
                 })}
@@ -250,3 +303,102 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+
+const Stat = ({ label, value }: { label: string; value: number }) => (
+  <div className="rounded-lg border bg-card p-4 text-center">
+    <p className="text-2xl font-extrabold text-primary">{value}</p>
+    <p className="text-xs text-muted-foreground">{label}</p>
+  </div>
+);
+
+const AnnouncementsAdmin = ({ userId }: { userId: string }) => {
+  const [items, setItems] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const load = async () => {
+    const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
+    setItems(data ?? []);
+  };
+  useEffect(() => { load(); }, []);
+  const add = async () => {
+    if (!title.trim()) return;
+    const { error } = await supabase.from("announcements").insert({ title, body, created_by: userId });
+    if (error) toast.error(error.message); else { setTitle(""); setBody(""); load(); }
+  };
+  const toggle = async (id: string, active: boolean) => {
+    await supabase.from("announcements").update({ active: !active }).eq("id", id); load();
+  };
+  const del = async (id: string) => {
+    await supabase.from("announcements").delete().eq("id", id); load();
+  };
+  return (
+    <Card><CardContent className="p-4 space-y-3">
+      <div className="space-y-2 rounded-lg border p-3">
+        <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Textarea placeholder="Message body" value={body} onChange={(e) => setBody(e.target.value)} />
+        <Button onClick={add} className="gap-2"><Plus className="h-4 w-4" /> Post announcement</Button>
+      </div>
+      {items.map((a) => (
+        <div key={a.id} className="flex items-center justify-between rounded-lg border p-3">
+          <div className="flex-1">
+            <p className="font-semibold">{a.title}</p>
+            <p className="text-xs text-muted-foreground">{a.body}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => toggle(a.id, a.active)}>{a.active ? "Hide" : "Show"}</Button>
+            <Button size="sm" variant="destructive" onClick={() => del(a.id)}><Trash2 className="h-3 w-3" /></Button>
+          </div>
+        </div>
+      ))}
+    </CardContent></Card>
+  );
+};
+
+const PromoAdmin = () => {
+  const [codes, setCodes] = useState<any[]>([]);
+  const [code, setCode] = useState("");
+  const [months, setMonths] = useState("1");
+  const [maxUses, setMaxUses] = useState("100");
+  const load = async () => {
+    const { data } = await supabase.from("promo_codes").select("*").order("created_at", { ascending: false });
+    setCodes(data ?? []);
+  };
+  useEffect(() => { load(); }, []);
+  const add = async () => {
+    if (!code.trim()) return;
+    const { error } = await supabase.from("promo_codes").insert({
+      code: code.trim().toUpperCase(),
+      free_months: parseInt(months) || 1,
+      max_uses: parseInt(maxUses) || 100,
+    });
+    if (error) toast.error(error.message); else { setCode(""); load(); toast.success("Created"); }
+  };
+  const toggle = async (id: string, active: boolean) => {
+    await supabase.from("promo_codes").update({ active: !active }).eq("id", id); load();
+  };
+  const del = async (id: string) => {
+    await supabase.from("promo_codes").delete().eq("id", id); load();
+  };
+  return (
+    <Card><CardContent className="p-4 space-y-3">
+      <div className="grid gap-2 rounded-lg border p-3 sm:grid-cols-4">
+        <Input placeholder="CODE (e.g. WELCOME)" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
+        <Input type="number" placeholder="Free months" value={months} onChange={(e) => setMonths(e.target.value)} />
+        <Input type="number" placeholder="Max uses" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} />
+        <Button onClick={add} className="gap-2"><Plus className="h-4 w-4" /> Create code</Button>
+      </div>
+      {codes.map((c) => (
+        <div key={c.id} className="flex items-center justify-between rounded-lg border p-3">
+          <div>
+            <p className="font-mono font-bold">{c.code}</p>
+            <p className="text-xs text-muted-foreground">{c.free_months}mo · used {c.uses}/{c.max_uses} · {c.active ? "active" : "disabled"}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => toggle(c.id, c.active)}>{c.active ? "Disable" : "Enable"}</Button>
+            <Button size="sm" variant="destructive" onClick={() => del(c.id)}><Trash2 className="h-3 w-3" /></Button>
+          </div>
+        </div>
+      ))}
+    </CardContent></Card>
+  );
+};

@@ -167,6 +167,15 @@
     font-size: 1.15rem;
     line-height: 1.8;
   }
+
+  /* Color overlays for Irlen syndrome / dyslexia comfort */
+  .overlay-cream { background-color: hsl(45 60% 92%) !important; }
+  .overlay-blue { background-color: hsl(210 50% 92%) !important; }
+  .overlay-pink { background-color: hsl(350 50% 94%) !important; }
+  .overlay-mint { background-color: hsl(150 40% 92%) !important; }
+
+  /* Keyboard focus polish */
+  *:focus-visible { outline: 3px solid hsl(var(--primary)); outline-offset: 2px; border-radius: 4px; }
 }
 
 @layer base {

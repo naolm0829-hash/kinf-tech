@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useProgress } from "@/hooks/useProgress";
 import { useAuth } from "@/contexts/AuthContext";
 import { playTapSound, playCorrectSound, playWrongSound, playSuccessSound, speakAmharic } from "@/lib/sounds";
+import { VoiceAnswerButton } from "@/components/VoiceAnswerButton";
 
 interface QuizQuestion {
   question: string;
@@ -646,6 +647,13 @@ const LearningLab = () => {
           <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
             <span>{t("quiz.title")} – {quizIndex + 1}/{mod.quiz.length}</span>
             <span>{t("quiz.score")}: {quizScore}</span>
+          </div>
+          <div className="mb-3 flex justify-end">
+            <VoiceAnswerButton
+              options={(lang === "am" ? mod.quiz[quizIndex].optionsAm : mod.quiz[quizIndex].options) as string[]}
+              onAnswer={handleAnswer}
+              disabled={answered}
+            />
           </div>
 
           <AnimatePresence mode="wait">

@@ -121,6 +121,13 @@ const Premium = () => {
 
         <Card className="mb-4">
           <CardContent className="p-5">
+            <h2 className="mb-3 font-bold">🎁 Have a promo code?</h2>
+            <PromoRedeem onDone={refresh} />
+          </CardContent>
+        </Card>
+
+        <Card className="mb-4">
+          <CardContent className="p-5">
             <h2 className="mb-2 font-bold">Step 1 — Send {PRICE_ETB} ETB via Telebirr</h2>
             <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
               <p>📱 Telebirr number: <span className="font-mono font-bold text-base">{TELEBIRR_NUMBER}</span></p>
@@ -184,3 +191,23 @@ const Premium = () => {
 };
 
 export default Premium;
+
+const PromoRedeem = ({ onDone }: { onDone: () => void }) => {
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const apply = async () => {
+    if (!code.trim()) return;
+    setLoading(true);
+    const { data, error } = await supabase.rpc("redeem_promo", { _code: code.trim() });
+    setLoading(false);
+    const res = data as { ok: boolean; error?: string } | null;
+    if (error || !res?.ok) toast.error(res?.error || error?.message || "Failed");
+    else { toast.success("Premium activated!"); setCode(""); onDone(); }
+  };
+  return (
+    <div className="flex gap-2">
+      <Input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ENTER CODE" />
+      <Button onClick={apply} disabled={loading}>{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Redeem"}</Button>
+    </div>
+  );
+};

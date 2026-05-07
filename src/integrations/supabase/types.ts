@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          active: boolean
+          body: string
+          created_at: string
+          created_by: string
+          id: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          body: string
+          created_at?: string
+          created_by: string
+          id?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      behavior_journal: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          mood: string
+          notes: string | null
+          triggers: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood: string
+          notes?: string | null
+          triggers?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          triggers?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      children: {
+        Row: {
+          age: number | null
+          avatar_emoji: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          parent_id: string
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          avatar_emoji?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          parent_id: string
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          avatar_emoji?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          parent_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       community_content: {
         Row: {
           body: string
@@ -173,6 +266,65 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          free_months: number
+          id: string
+          max_uses: number
+          uses: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          free_months?: number
+          id?: string
+          max_uses?: number
+          uses?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          free_months?: number
+          id?: string
+          max_uses?: number
+          uses?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          code_id: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           activated_at: string | null
@@ -203,6 +355,27 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      therapist_clients: {
+        Row: {
+          created_at: string
+          id: string
+          parent_id: string
+          therapist_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_id: string
+          therapist_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_id?: string
+          therapist_id?: string
         }
         Relationships: []
       }
@@ -272,9 +445,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      redeem_promo: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "therapist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -402,7 +576,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "therapist"],
     },
   },
 } as const
